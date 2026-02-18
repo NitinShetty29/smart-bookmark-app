@@ -35,11 +35,17 @@ A modern, real-time bookmark management application built with Next.js, Supabase
 ## 📸 Screenshots
 
 ### Landing Page
+
+![Landing Page](/screenshots/landing.png)
+
 - Clean, animated landing page with Google OAuth sign-in
 - Feature cards with hover effects
 - Gradient text animations and floating blob background
 
 ### Dashboard
+
+![Dashboard](/screenshots/dashboard.png)
+
 - Two-column layout: Add bookmark form + bookmark list
 - Real-time status indicator (Live/Connecting/Disconnected)
 - Search functionality with instant filtering

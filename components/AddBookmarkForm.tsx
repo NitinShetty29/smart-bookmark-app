@@ -5,21 +5,23 @@ import { useState } from 'react'
 
 interface AddBookmarkFormProps {
   userId: string
+  onAdd: (bookmark: any) => void
 }
 
-export default function AddBookmarkForm({ userId }: AddBookmarkFormProps) {
+export default function AddBookmarkForm({ userId, onAdd }: AddBookmarkFormProps) {
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     setSuccess(false)
+
+    const supabase = createClient()
 
     let validatedUrl = url.trim()
     if (!validatedUrl.startsWith('http://') && !validatedUrl.startsWith('https://')) {
@@ -34,21 +36,49 @@ export default function AddBookmarkForm({ userId }: AddBookmarkFormProps) {
       return
     }
 
-    const { error: insertError } = await supabase
-      .from('bookmarks')
-      .insert({
-        user_id: userId,
-        title: title.trim(),
-        url: validatedUrl,
-      } as any)
+    try {
+      // Step 1: Insert the bookmark
+      const { error: insertError } = await supabase
+        .from('bookmarks')
+        .insert({
+          user_id: userId,
+          title: title.trim(),
+          url: validatedUrl,
+        } as any)
 
-    if (insertError) {
-      setError(insertError.message)
-    } else {
+      if (insertError) {
+        console.error('Insert error:', insertError)
+        setError(insertError.message)
+        setLoading(false)
+        return
+      }
+
+      // Step 2: Fetch the bookmark we just inserted
+      const { data: fetchedBookmarks, error: fetchError } = await supabase
+        .from('bookmarks')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('url', validatedUrl)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (fetchError) {
+        console.error('Fetch error:', fetchError)
+      }
+
+      if (fetchedBookmarks && fetchedBookmarks.length > 0) {
+        // Step 3: Add to UI immediately
+        onAdd(fetchedBookmarks[0])
+      }
+
+      // Step 4: Clear form and show success
       setTitle('')
       setUrl('')
       setSuccess(true)
       setTimeout(() => setSuccess(false), 2000)
+    } catch (err) {
+      console.error('Unexpected error:', err)
+      setError('Something went wrong. Please try again.')
     }
 
     setLoading(false)

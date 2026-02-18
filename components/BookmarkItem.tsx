@@ -1,11 +1,10 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { Bookmark } from '@/types/database'
 import { useState } from 'react'
 
 interface BookmarkItemProps {
-  bookmark: Bookmark
+  bookmark: any
   onDelete: (id: string) => void
 }
 
@@ -16,11 +15,8 @@ export default function BookmarkItem({ bookmark, onDelete }: BookmarkItemProps) 
 
   const handleDelete = async () => {
     setDeleting(true)
-
-    // Remove from UI immediately
     onDelete(bookmark.id)
 
-    // Delete from database
     const { error } = await supabase
       .from('bookmarks')
       .delete()
@@ -58,7 +54,6 @@ export default function BookmarkItem({ bookmark, onDelete }: BookmarkItemProps) 
 
   return (
     <div className="group relative flex items-start gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200 animate-slide-in">
-      {/* Favicon */}
       <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gray-50 ring-1 ring-gray-100">
         {getFaviconUrl(bookmark.url) ? (
           <img
@@ -76,7 +71,6 @@ export default function BookmarkItem({ bookmark, onDelete }: BookmarkItemProps) 
         )}
       </div>
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <a
           href={bookmark.url}
@@ -96,7 +90,6 @@ export default function BookmarkItem({ bookmark, onDelete }: BookmarkItemProps) 
         </div>
       </div>
 
-      {/* Delete Button */}
       <div className="flex-shrink-0">
         {showConfirm ? (
           <div className="flex items-center gap-2 animate-fade-in">
